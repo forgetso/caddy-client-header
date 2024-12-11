@@ -1,4 +1,4 @@
-module github.com/rushiiMachine/caddy-ja3
+module github.com/forgetso/caddy-client-header
 
 go 1.20
 
