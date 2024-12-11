@@ -64,9 +64,11 @@ func (l *JA3Listener) UnmarshalCaddyfile(_ *caddyfile.Dispenser) error {
 func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 	conn, err := l.Listener.Accept()
 	if err != nil {
+
 		return conn, err
 	}
 
+	l.log.Info("Reading ClientHello for " + conn.RemoteAddr().String())
 	ch, err := ReadClientHello(conn)
 	if err == nil {
 		addr := conn.RemoteAddr().String()
@@ -79,7 +81,7 @@ func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 		l.log.Debug("Failed to read ClientHello for "+conn.RemoteAddr().String(), zap.Error(err))
 	}
 
-	l.log.Debug("ClientHello: " + string(ch))
+	l.log.Info("ClientHello: " + string(ch))
 
 	return RewindConn(conn, ch)
 }
