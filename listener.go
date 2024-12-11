@@ -3,12 +3,11 @@ package caddy_ja3
 import (
 	"encoding/binary"
 	"errors"
-	"io"
-	"net"
-
-	"github.com/caddyserver/caddy/v2"
+	"fmt"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"go.uber.org/zap"
+	"io"
+	"net"
 )
 
 func init() {
@@ -93,11 +92,20 @@ func (l *tlsClientHelloListener) Close() error {
 }
 
 func ReadClientHello(r io.Reader) (ch []byte, err error) {
-	// Obtained from https://github.com/gaukas/clienthellod/blob/7cce34b88b314256c8759998f6192860f6f6ede5/clienthello.go#L68
+
+	buf := make([]byte, 2000)
+	for {
+		n, err := r.Read(buf)
+		fmt.Println(n, err, buf[:n])
+		if err == io.EOF {
+			fmt.Println("EOF at", zap.Int("n", n))
+			break
+		}
+	}
 
 	// Read a TLS record
-	// Read exactly 5 bytes from the reader
-	raw := make([]byte, 5)
+	// Read all the bytes from the reader
+	raw := make([]byte, 2000)
 	if _, err = io.ReadFull(r, raw); err != nil {
 		return
 	}
@@ -108,9 +116,9 @@ func ReadClientHello(r io.Reader) (ch []byte, err error) {
 		return
 	}
 
-	// Read exactly length bytes from the reader
-	raw = append(raw, make([]byte, binary.BigEndian.Uint16(raw[3:5]))...)
-	_, err = io.ReadFull(r, raw[5:])
+	// Read exactly 2000 length bytes from the reader
+	raw = append(raw, make([]byte, binary.BigEndian.Uint16(raw[3:2000]))...)
+	_, err = io.ReadFull(r, raw[2000:])
 	return raw, nil
 }
 
