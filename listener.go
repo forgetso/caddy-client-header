@@ -81,7 +81,14 @@ func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 		l.log.Debug("Failed to read ClientHello for "+conn.RemoteAddr().String(), zap.Error(err))
 	}
 
-	l.log.Info("ClientHello: " + string(ch))
+	// Safely log the ClientHello, checking if the byte slice is empty
+	if len(ch) > 0 {
+		// If the byte slice is not empty, log it in a more human-readable way (e.g., hex format)
+		l.log.Info("ClientHello: " + fmt.Sprintf("%x", ch))
+	} else {
+		// Log a message indicating that the ClientHello is empty or incomplete
+		l.log.Info("ClientHello: (empty or incomplete)")
+	}
 
 	return RewindConn(conn, ch)
 }
