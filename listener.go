@@ -72,7 +72,7 @@ func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 	ch, err := ReadClientHello(conn)
 	if err == nil {
 		addr := conn.RemoteAddr().String()
-		if err := l.cache.SetClientHello(l, addr, ch); err != nil {
+		if err := l.cache.SetClientHello(addr, ch); err != nil {
 			l.log.Error("Failed to cache JA3 for "+addr, zap.Error(err))
 		}
 

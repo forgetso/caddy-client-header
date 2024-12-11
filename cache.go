@@ -26,7 +26,7 @@ func (c *Cache) Provision(ctx caddy.Context) error {
 	return nil
 }
 
-func (c *Cache) SetClientHello(l *tlsClientHelloListener, addr string, ch []byte) error {
+func (c *Cache) SetClientHello(addr string, ch []byte) error {
 	c.ja3Lock.Lock()
 	defer c.ja3Lock.Unlock()
 
@@ -40,20 +40,24 @@ func (c *Cache) SetClientHello(l *tlsClientHelloListener, addr string, ch []byte
 	// Log parsedCh asynchronously using a goroutine
 	go func() {
 		// Ensure that the logging is done without blocking the main flow
-		logParsedClientHello(l, parsedCh)
+		logParsedClientHello(parsedCh)
 	}()
 
 	return nil
 }
 
 // Log the parsed ClientHello details asynchronously
-func logParsedClientHello(l *tlsClientHelloListener, parsedCh *tlsx.ClientHelloBasic) {
-	l.log.Info("Parsing ClientHello")
+func logParsedClientHello(parsedCh *tlsx.ClientHelloBasic) {
+	// Initialize the zap logger (can be adjusted for production or debug)
+	log, _ := zap.NewProduction()
+	defer log.Sync() // Flushes any buffered log entries
+
+	log.Info("Parsing ClientHello")
 	// Call the String() method to get the formatted representation of the ClientHello
 	clientHelloString := parsedCh.String()
 
 	// Log the formatted string
-	l.log.Info("Parsed ClientHello", zap.String("ClientHello", clientHelloString))
+	log.Info("Parsed ClientHello", zap.String("ClientHello", clientHelloString))
 }
 
 func (c *Cache) ClearJA3(addr string) {
