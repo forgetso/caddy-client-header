@@ -48,6 +48,7 @@ func (c *Cache) SetClientHello(l *tlsClientHelloListener, addr string, ch []byte
 
 // Log the parsed ClientHello details asynchronously
 func logParsedClientHello(l *tlsClientHelloListener, parsedCh *tlsx.ClientHelloBasic) {
+	l.log.Info("Parsing ClientHello")
 	// Call the String() method to get the formatted representation of the ClientHello
 	clientHelloString := parsedCh.String()
 
