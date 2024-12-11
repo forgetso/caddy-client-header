@@ -79,6 +79,8 @@ func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 		l.log.Debug("Failed to read ClientHello for "+conn.RemoteAddr().String(), zap.Error(err))
 	}
 
+	l.log.Debug("ClientHello: " + string(ch))
+
 	return RewindConn(conn, ch)
 }
 
