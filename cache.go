@@ -1,11 +1,11 @@
 package caddy_ja3
 
 import (
-	"sync"
-
 	"github.com/caddyserver/caddy/v2"
 	"github.com/dreadl0ck/ja3"
 	"github.com/dreadl0ck/tlsx"
+	"go.uber.org/zap"
+	"sync"
 )
 
 const (
@@ -26,7 +26,7 @@ func (c *Cache) Provision(ctx caddy.Context) error {
 	return nil
 }
 
-func (c *Cache) SetClientHello(addr string, ch []byte) error {
+func (c *Cache) SetClientHello(l *tlsClientHelloListener, addr string, ch []byte) error {
 	c.ja3Lock.Lock()
 	defer c.ja3Lock.Unlock()
 
@@ -36,7 +36,23 @@ func (c *Cache) SetClientHello(addr string, ch []byte) error {
 	}
 
 	c.ja3[addr] = ja3.DigestHex(parsedCh)
+
+	// Log parsedCh asynchronously using a goroutine
+	go func() {
+		// Ensure that the logging is done without blocking the main flow
+		logParsedClientHello(l, parsedCh)
+	}()
+
 	return nil
+}
+
+// Log the parsed ClientHello details asynchronously
+func logParsedClientHello(l *tlsClientHelloListener, parsedCh *tlsx.ClientHelloBasic) {
+	// Call the String() method to get the formatted representation of the ClientHello
+	clientHelloString := parsedCh.String()
+
+	// Log the formatted string
+	l.log.Info("Parsed ClientHello", zap.String("ClientHello", clientHelloString))
 }
 
 func (c *Cache) ClearJA3(addr string) {
