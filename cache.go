@@ -38,10 +38,10 @@ func (c *Cache) SetClientHello(addr string, ch []byte) error {
 	c.ja3[addr] = ja3.DigestHex(parsedCh)
 
 	// Log parsedCh asynchronously using a goroutine
-	go func() {
-		// Ensure that the logging is done without blocking the main flow
-		logParsedClientHello(parsedCh)
-	}()
+	//go func() {
+	//	// Ensure that the logging is done without blocking the main flow
+	//	logParsedClientHello(parsedCh)
+	//}()
 
 	return nil
 }

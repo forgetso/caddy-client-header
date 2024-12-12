@@ -64,7 +64,6 @@ func (l *JA3Listener) UnmarshalCaddyfile(_ *caddyfile.Dispenser) error {
 func (l *tlsClientHelloListener) Accept() (net.Conn, error) {
 	conn, err := l.Listener.Accept()
 	if err != nil {
-
 		return conn, err
 	}
 
